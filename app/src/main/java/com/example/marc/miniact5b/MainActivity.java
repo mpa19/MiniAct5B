@@ -3,9 +3,13 @@ package com.example.marc.miniact5b;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -17,6 +21,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import android.os.AsyncTask;
+
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -103,6 +109,44 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    class AsynTaskRunner2 extends AsyncTask<String, String, Bitmap> {
+
+        @Override
+        protected Bitmap doInBackground(String... strings) {
+
+            InputStream in =null;
+            Bitmap bmp=null;
+            int responseCode = -1;
+            try {
+                URL url = new URL("https://i1.wp.com/www.pazdeselvaverde.org/wp-content/uploads/2014/01/imagenes-de-paisajes-paisajes-1.jpg");
+                HttpURLConnection con = (HttpURLConnection)url.openConnection();
+                con.setDoInput(true);
+                con.connect();
+                responseCode = con.getResponseCode();
+                if(responseCode == HttpURLConnection.HTTP_OK)
+                {
+                    in = con.getInputStream();
+                    bmp = BitmapFactory.decodeStream(in);
+                    in.close();
+                    return bmp;
+                }
+            }
+            catch(Exception ex){
+                Log.e("Exception",ex.toString());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap s) {
+            super.onPostExecute(s);
+            iv.setBackground(new BitmapDrawable(getApplicationContext().getResources(), s));
+        }
+    }
+
+
+
+
     public void onClickText(View v) {
 
         AsynTaskRunner runner = new AsynTaskRunner();
@@ -127,7 +171,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickImage(View v) {
-
+        AsynTaskRunner2 runner = new AsynTaskRunner2();
+        runner.execute();
     }
 
     @Override
